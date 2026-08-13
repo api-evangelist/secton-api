@@ -1,0 +1,46 @@
+name: Secton API
+description: >-
+  A developer-first AI platform providing an OpenAI-compatible inference API for embedding AI into apps — chatbots,
+  copilots, and smart features via chat-completions and models endpoints, plus a first-party TypeScript SDK.
+url: https://secton-api.apievangelist.com/apis.yml
+created: '2026-08-13'
+modified: '2026-08-13'
+specificationVersion: '0.21'
+tags:
+  - ai
+  - inference
+  - llm
+  - chat-completions
+  - generative-ai
+  - developer-tools
+  - api
+apis:
+  - name: Secton API
+    description: >-
+      OpenAI-compatible inference REST API with chat-completions (streaming supported) and model-listing endpoints,
+      using API-key authentication via the Authorization header.
+    humanURL: https://dev.secton.org
+    baseURL: https://api.secton.org
+    tags:
+      - ai
+      - inference
+      - llm
+      - chat-completions
+      - generative-ai
+      - developer-tools
+      - api
+    properties:
+      - type: OpenAPI
+        url: https://console.secton.org/openapi.json
+      - type: LLMsTxt
+        url: https://dev.secton.org/llms.txt
+      - type: Documentation
+        url: https://dev.secton.org
+maintainers:
+  - FN: Secton
+    url: https://github.com/sectoncorp
+generated:
+  by: apis.io/add
+  model: claude-opus-4-8
+  confidence: 95
+  at: '2026-08-13T10:46:31.364Z'
