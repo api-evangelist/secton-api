@@ -1,0 +1,22 @@
+{
+  "provider": "secton-api",
+  "sources": [
+    "secton-api-openapi.json"
+  ],
+  "outputs": [
+    "secton-api-chat-api-openapi.yml",
+    "secton-api-models-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/secton-api-openapi.json"
+  ],
+  "errors": [
+    "secton-api-openapi.json: dangling $ref: #/components/responses/200 ChatCompletionChunkSchema"
+  ],
+  "warnings": [],
+  "notes": [
+    "secton-api-openapi.json: upgraded openapi 3.0.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+2 apis, 2 total)"
+  ],
+  "skipped": []
+}

@@ -1,0 +1,59 @@
+openapi: 3.2.0
+info:
+  title: Secton API Documentation Models API
+  version: 1.0.0
+  description: OpenAPI specification for Secton API.
+servers:
+- url: https://api.secton.org
+  description: Production
+tags:
+- name: Models
+paths:
+  /v1/models:
+    get:
+      operationId: get-external-api-v1-models
+      summary: List available models
+      description: ''
+      tags:
+      - Models
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelsResponseSchema'
+components:
+  schemas:
+    ModelsResponseSchema:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+          - list
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelSchema'
+      required:
+      - object
+      - data
+    ModelSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+          - model
+      required:
+      - id
+      - object
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization

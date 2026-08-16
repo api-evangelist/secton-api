@@ -1,0 +1,135 @@
+openapi: 3.2.0
+info:
+  title: Secton API Documentation Chat API
+  version: 1.0.0
+  description: OpenAPI specification for Secton API.
+servers:
+- url: https://api.secton.org
+  description: Production
+tags:
+- name: Chat
+paths:
+  /v1/chat/completions:
+    post:
+      operationId: post-external-api-v1-chat-completions
+      summary: Create a chat completion
+      description: ''
+      tags:
+      - Chat
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompletionRequestSchema'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatCompletionResponseSchema'
+        200 ChatCompletionChunkSchema:
+          $ref: '#/components/responses/200 ChatCompletionChunkSchema'
+components:
+  schemas:
+    ChatCompletionResponseSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+          - chat.completion
+        created:
+          type: number
+        model:
+          type: string
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: number
+              message:
+                type: object
+                properties:
+                  role:
+                    type: string
+                    enum:
+                    - assistant
+                  content:
+                    type: string
+                required:
+                - role
+                - content
+              finish_reason:
+                type: string
+            required:
+            - index
+            - message
+            - finish_reason
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: number
+            completion_tokens:
+              type: number
+            total_tokens:
+              type: number
+          required:
+          - prompt_tokens
+          - completion_tokens
+          - total_tokens
+      required:
+      - id
+      - object
+      - created
+      - model
+      - choices
+      - usage
+    ChatMessageSchema:
+      type: object
+      properties:
+        role:
+          type: string
+          enum:
+          - system
+          - user
+          - assistant
+        content:
+          type: string
+      required:
+      - role
+      - content
+    ChatCompletionRequestSchema:
+      type: object
+      properties:
+        model:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageSchema'
+          minItems: 1
+        temperature:
+          type: number
+          default: 0.7
+        stream:
+          type: boolean
+          default: false
+        max_tokens:
+          type: integer
+          maximum: 4096
+          exclusiveMinimum: 0
+      required:
+      - model
+      - messages
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization

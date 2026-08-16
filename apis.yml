@@ -15,27 +15,30 @@ tags:
   - developer-tools
   - api
 apis:
-  - name: Secton API
-    description: >-
-      OpenAI-compatible inference REST API with chat-completions (streaming supported) and model-listing endpoints,
-      using API-key authentication via the Authorization header.
-    humanURL: https://dev.secton.org
-    baseURL: https://api.secton.org
-    tags:
-      - ai
-      - inference
-      - llm
-      - chat-completions
-      - generative-ai
-      - developer-tools
-      - api
-    properties:
-      - type: OpenAPI
-        url: https://console.secton.org/openapi.json
-      - type: LLMsTxt
-        url: https://dev.secton.org/llms.txt
-      - type: Documentation
-        url: https://dev.secton.org
+- aid: secton-api:secton-api-chat-api
+  name: Secton API Chat API
+  description: The Chat API from Secton API — 1 operation(s) for chat.
+  humanURL: https://console.secton.org/api
+  baseURL: https://api.secton.org
+  tags:
+  - Chat
+  properties:
+  - type: OpenAPI
+    url: openapi/secton-api-chat-api-openapi.yml
+  - type: Documentation
+    url: https://console.secton.org/api
+- aid: secton-api:secton-api-models-api
+  name: Secton API Models API
+  description: The Models API from Secton API — 1 operation(s) for models.
+  humanURL: https://console.secton.org/api
+  baseURL: https://api.secton.org
+  tags:
+  - Models
+  properties:
+  - type: OpenAPI
+    url: openapi/secton-api-models-api-openapi.yml
+  - type: Documentation
+    url: https://console.secton.org/api
 maintainers:
   - FN: Secton
     url: https://github.com/sectoncorp
