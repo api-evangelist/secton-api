@@ -1,0 +1,106 @@
+generated: '2026-08-16'
+method: probed
+source: >-
+  live unauthenticated probes of https://api.secton.org/v1/models,
+  https://api.secton.org/v1/chat/completions and https://api.secton.org/openapi.json (2026-08-16);
+  derived from openapi/secton-api-chat-api-openapi.yml + openapi/secton-api-models-api-openapi.yml;
+  error class names read from the first-party npm `secton` 1.0.2 README
+format: custom
+rfc9457: false
+media_type: application/json
+envelope:
+  primary: '{"error": "<string>"}'
+  catch_all: '{"message": "<string>"}'
+  fields:
+    - name: error
+      type: string
+      description: Human-readable failure message. Present on real route failures.
+    - name: message
+      type: string
+      description: >-
+        Human-readable message returned by the api.secton.org catch-all for unrouted paths. Note
+        this arrives with HTTP 200, not 4xx.
+  stable_code: false
+  note: >-
+    There is no machine-readable error code, type URI, or `status` member. Clients must branch on
+    the HTTP status plus English prose.
+spec_coverage:
+  declared_error_responses: 0
+  declared_success_responses: 2
+  gap: >-
+    NEITHER published operation declares a single 4xx or 5xx response. The OpenAPI documents only
+    HTTP 200, while the live API demonstrably returns 401. `components.responses` is an empty
+    object. Every entry below therefore comes from observation or the SDK, not from the contract —
+    which is exactly the failure this artifact exists to surface. See overlays/ for the added
+    responses.
+problem_types:
+  - key: missing_api_key
+    http_status: 401
+    envelope_key: error
+    message: >-
+      API key is missing from bearer. Get your API key at https://console.secton.org/api
+    meaning: No `Authorization` header was supplied.
+    remediation: >-
+      Send `Authorization: <api key>` (the OpenAPI declares the raw key in the `Authorization`
+      header; the SDK sends it as a bearer credential). Obtain a key at
+      https://console.secton.org/api.
+    method: probed
+    observed_on:
+      - 'GET https://api.secton.org/v1/models'
+      - 'POST https://api.secton.org/v1/chat/completions'
+    declared_in_spec: false
+  - key: invalid_api_key
+    http_status: 401
+    envelope_key: error
+    message: Invalid or expired API key
+    meaning: An `Authorization` credential was supplied but is not recognised or has expired.
+    remediation: Rotate or re-issue the key in the console; do not retry with the same credential.
+    method: probed
+    observed_on:
+      - 'POST https://api.secton.org/v1/chat/completions (Authorization: Bearer <invalid>)'
+    declared_in_spec: false
+  - key: unknown_route
+    http_status: 200
+    envelope_key: message
+    message: "The <path> endpoint doesn't exist!"
+    meaning: >-
+      The requested path is not routed. THIS IS A SOFT-404 — the API returns HTTP 200 for a
+      not-found condition, so status-code-driven clients and discovery crawlers see success.
+    remediation: >-
+      Consumers must inspect the body. Provider fix: return HTTP 404. This defect also makes every
+      /.well-known/ probe against api.secton.org unusable — see well-known/.
+    method: probed
+    observed_on:
+      - 'GET https://api.secton.org/openapi.json'
+      - 'GET https://api.secton.org/.well-known/agent-card.json'
+      - 'POST https://api.secton.org/mcp'
+      - 'POST https://api.secton.org/graphql'
+    declared_in_spec: false
+  - key: rate_limited
+    http_status: 429
+    envelope_key: error
+    message: unknown — not published, not reproducible without an authenticated key
+    meaning: Request throttled.
+    remediation: Honour the retry hint and back off exponentially.
+    method: derived
+    derived_from: >-
+      npm `secton` 1.0.2 exports a `RateLimitError` carrying a `retryAfter` value, so the API
+      signals throttling in some form. The status code and envelope are inferred from the
+      OpenAI-compatible shape and are NOT confirmed.
+    confidence: low
+    declared_in_spec: false
+sdk_error_classes:
+  source: npm `secton` 1.0.2 README
+  note: >-
+    The SDK maps transport-level failures onto typed exceptions client-side; these are SDK
+    constructs, not API-declared error types.
+  classes:
+    - SectonError
+    - AuthenticationError
+    - RateLimitError
+    - NetworkError
+recommendations:
+  - Declare 401 (and 429, and 5xx) responses on both operations in the OpenAPI.
+  - Return HTTP 404 for unrouted paths instead of HTTP 200.
+  - Add a stable machine-readable `code` to the error envelope, or adopt RFC 9457 problem+json.
+  - Unify the `error` / `message` envelope keys.

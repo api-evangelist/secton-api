@@ -1,0 +1,137 @@
+generated: '2026-08-16'
+method: probed
+source: live HTTP probes of every apis.yml baseURL host, every OpenAPI servers[] host, and the docs/console hosts
+summary:
+  hosts_probed: 4
+  paths_probed_per_host: 8
+  documents_found: 0
+  pointer_emitted: false
+  note: >-
+    NO /.well-known/ document is served on any Secton host. No `WellKnown`, `APICatalog` or
+    `SecurityTxt` pointer is wired into apis.yml, because a recorded absence must not be scored as a
+    presence. IMPORTANT FALSE-POSITIVE GUARD: api.secton.org answers HTTP 200 with
+    `application/json` for EVERY unknown path, returning
+    `{"message":"The <path> endpoint doesn't exist!"}`. Those 200s are soft-404s, not documents, and
+    are recorded as misses below. console.secton.org and secton.org return an HTML 404 page for
+    every /.well-known/* path. dev.secton.org — the docs host named in this repo's PROFILE.md —
+    does not resolve in DNS at all (NXDOMAIN).
+hosts:
+  - host: api.secton.org
+    role: API base (apis.yml baseURL + OpenAPI servers[])
+    catch_all: soft-404 — HTTP 200 application/json `{"message":"The … endpoint doesn't exist!"}`
+    probes:
+      - path: /.well-known/security.txt
+        status: 200
+        result: miss
+        evidence: 'body: {"message":"The /.well-known/security.txt endpoint doesn''t exist!"}'
+      - path: /.well-known/openid-configuration
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+      - path: /.well-known/api-catalog
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+      - path: /.well-known/ai-plugin.json
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+      - path: /.well-known/agent-card.json
+        status: 200
+        result: miss
+        evidence: 'body: {"message":"The /.well-known/agent-card.json endpoint doesn''t exist!"}'
+      - path: /.well-known/agent.json
+        status: 200
+        result: miss
+        evidence: soft-404 JSON
+  - host: console.secton.org
+    role: console / API-key issuance / OpenAPI host
+    catch_all: HTML 404 page (Next.js)
+    probes:
+      - path: /.well-known/security.txt
+        status: 404
+        result: miss
+      - path: /.well-known/openid-configuration
+        status: 404
+        result: miss
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        result: miss
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+        result: miss
+      - path: /.well-known/api-catalog
+        status: 404
+        result: miss
+      - path: /.well-known/ai-plugin.json
+        status: 404
+        result: miss
+      - path: /.well-known/agent-card.json
+        status: 404
+        result: miss
+      - path: /.well-known/agent.json
+        status: 404
+        result: miss
+  - host: platform.secton.org
+    role: host named as the SDK's home in the npm README; now serves the same console application
+    catch_all: HTML 404 page (Next.js)
+    probes:
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+        result: miss
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        result: miss
+      - path: /.well-known/openid-configuration
+        status: 404
+        result: miss
+  - host: secton.org
+    role: corporate website
+    catch_all: HTML 404 page (Next.js)
+    probes:
+      - path: /.well-known/security.txt
+        status: 404
+        result: miss
+      - path: /.well-known/openid-configuration
+        status: 404
+        result: miss
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        result: miss
+      - path: /.well-known/api-catalog
+        status: 404
+        result: miss
+      - path: /.well-known/ai-plugin.json
+        status: 404
+        result: miss
+      - path: /.well-known/agent-card.json
+        status: 404
+        result: miss
+      - path: /.well-known/agent.json
+        status: 404
+        result: miss
+  - host: dev.secton.org
+    role: docs host asserted by this repo's PROFILE.md
+    catch_all: n/a
+    probes:
+      - path: '*'
+        status: 0
+        result: NXDOMAIN — host does not resolve
+        evidence: >-
+          `dig +short dev.secton.org` returns nothing. The PROFILE.md claim that an llms.txt is
+          "confirmed at https://dev.secton.org/llms.txt" on a "Mintlify-hosted" docs site could not
+          be reproduced and is recorded here as unverifiable.
+recommendation: >-
+  Secton should serve, at minimum, /.well-known/security.txt on secton.org pointing at the existing
+  HackerOne intake (see security/secton-api-vulnerability-disclosure.yml) — the disclosure program
+  already exists, it is just not machine-discoverable. Separately, api.secton.org should return a
+  real 404 status for unknown paths instead of HTTP 200; the current soft-404 makes automated
+  discovery of any well-known document impossible to distinguish from a hit.

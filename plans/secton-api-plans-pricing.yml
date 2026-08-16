@@ -1,0 +1,47 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  https://secton.org/legal/console-terms (§14 Fees and Billing, effective 2026-08-06),
+  probes of https://secton.org/pricing (404), https://console.secton.org/pricing (404),
+  https://console.secton.org/billing (404)
+plan_count: 0
+currency: null
+billing_model: not-published
+plans: []
+finding: >-
+  Secton publishes NO pricing page and NO plan tiers on any public host. This is not an
+  enterprise "contact sales" gate either — there is no sales funnel, no quote request, and no
+  published price list of any kind. Access is obtained by creating a Console account and issuing an
+  API key at https://console.secton.org/api, and whatever quota attaches to that key is disclosed
+  only inside the authenticated console.
+evidence:
+  - url: https://secton.org/pricing
+    status: 404
+  - url: https://console.secton.org/pricing
+    status: 404
+  - url: https://console.secton.org/billing
+    status: 404
+  - url: https://secton.org/legal/console-terms
+    status: 200
+    note: >-
+      §14 Fees and Billing is written entirely in the conditional: "Certain Services may be provided
+      without charge. Certain Services may require payment now or in the future. … If paid Services
+      are introduced: fees may be based on subscriptions, usage, consumption, or other pricing
+      models." It closes with "Nothing in these Terms guarantees the continued availability of any
+      free tier, trial, promotional program, credit allocation, or complimentary usage allowance."
+      That wording is consistent with a currently-free service with no committed pricing.
+indirect_signals:
+  - signal: credits
+    evidence: >-
+      The first-party npm SDK exposes `client.usage.get()` returning `creditsAvailable` and
+      `creditsTotal`, plus `client.usage.getAlerts()`. A credit ledger therefore exists behind the
+      console, even though no credit price, allocation or refill policy is published.
+    source: npm `secton` 1.0.2 README
+  - signal: token accounting
+    evidence: >-
+      Every chat completion returns `usage.prompt_tokens`, `usage.completion_tokens` and
+      `usage.total_tokens`, the metering primitives a usage-based price would be built on.
+    source: openapi/_original/secton-api-openapi.json
+recommendation: >-
+  Publish a pricing page — even one that says "free, with a credit allowance of N" — outside the
+  login. A buyer, and an agent, currently cannot determine the cost of a call without registering.

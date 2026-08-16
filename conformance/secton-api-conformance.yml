@@ -1,0 +1,118 @@
+generated: '2026-08-16'
+method: derived
+source: >-
+  openapi/_original/secton-api-openapi.json,
+  openapi/secton-api-chat-api-openapi.yml,
+  openapi/secton-api-models-api-openapi.yml,
+  live probes of https://api.secton.org (2026-08-16),
+  https://secton.org/legal/console-terms, https://secton.org/legal/privacy, https://secton.org/security
+summary:
+  conforms_count: 3
+  evaluated_count: 14
+  certifications_published: 0
+  compliance_pointer_emitted: false
+  note: >-
+    Secton publishes no third-party certification, audit report, or trust centre. No `Compliance`
+    pointer is wired into apis.yml — the Privacy Policy's California/international-transfer sections
+    are legal notices, not an attested compliance program.
+standards:
+  - id: openapi
+    conforms: true
+    version: 3.0.0 (as published) / 3.2.0 (refined copies in this repo)
+    evidence: >-
+      https://console.secton.org/openapi.json returns a parseable OpenAPI 3.0.0 document with
+      `info`, `servers`, `paths` and `components`. Byte-identical copy at
+      openapi/_original/secton-api-openapi.json.
+    caveats:
+      - '`security` is placed under `components.security`, which is not a valid OpenAPI location — no operation is actually secured by the document.'
+      - 'The response key `"200 ChatCompletionChunkSchema"` is not a valid status code or `default`, and it $refs `#/components/responses/200 ChatCompletionChunkSchema`, which does not exist (`components.responses` is `{}`) — an unresolvable reference.'
+      - 'No 4xx/5xx responses on any operation.'
+      - 'No `examples` anywhere in the document.'
+      - '`info.description` is a single tautological sentence ("OpenAPI specification for Secton API."); no `contact`, `license`, or `termsOfService`.'
+  - id: openai-chat-completions-compatibility
+    conforms: true
+    evidence: >-
+      Paths, request body (`model`, `messages[{role,content}]`, `temperature`, `stream`,
+      `max_tokens`) and response envelopes (`chat.completion`, `chat.completion.chunk`,
+      `usage.{prompt,completion,total}_tokens`, `{"object":"list","data":[...]}` for models) mirror
+      the OpenAI Chat Completions shape. This is a de-facto interoperability convention, not a
+      published standard body specification.
+    caveats:
+      - 'Only a subset is implemented: no `n`, `top_p`, `stop`, `presence_penalty`, `frequency_penalty`, `tools`/function calling, `response_format`, `seed`, or `logprobs`.'
+      - 'The OpenAPI declares the raw API key in the `Authorization` header, while the live error text says "missing from bearer". Probing both forms (`Authorization: <key>` and `Authorization: Bearer <key>`) returned the same "Invalid or expired API key" 401, so the server tolerates both — but the published contract documents only one, and never says so.'
+  - id: json
+    conforms: true
+    evidence: All request and response payloads are `application/json`.
+  - id: rfc9457
+    conforms: false
+    evidence: >-
+      Errors are `{"error":"<string>"}` with `content-type: application/json`, not
+      `application/problem+json`. See errors/secton-api-problem-types.yml.
+  - id: oauth2
+    conforms: false
+    evidence: >-
+      No OAuth flow declared in the OpenAPI and no `/.well-known/oauth-authorization-server` on any
+      host (all 404 or soft-404). Authentication is a static API key.
+  - id: oidc
+    conforms: false
+    evidence: '`/.well-known/openid-configuration` 404s on secton.org, console.secton.org and platform.secton.org.'
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: >-
+      No security.txt on any host, despite an active HackerOne disclosure intake. See
+      security/secton-api-vulnerability-disclosure.yml.
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: >-
+      No `Sunset` or `Deprecation` header on live responses — notable given the provider published a
+      dated API shutdown notice. See lifecycle/secton-api-lifecycle.yml.
+  - id: rfc9110-status-semantics
+    conforms: false
+    evidence: >-
+      api.secton.org returns HTTP 200 for unrouted paths instead of 404, violating the core
+      semantics of the status code.
+  - id: idempotency
+    conforms: false
+    evidence: 'No idempotency key on POST /v1/chat/completions. See conventions/.'
+  - id: pagination
+    conforms: false
+    evidence: 'GET /v1/models returns an unbounded list with no cursor or limit parameter.'
+  - id: rate-limit-headers
+    conforms: false
+    evidence: >-
+      No `RateLimit-*`, `X-RateLimit-*` or `Retry-After` observed on the 401 responses that could be
+      inspected anonymously. Console Terms §13 enumerates limit CATEGORIES but publishes no values.
+  - id: asyncapi
+    conforms: false
+    applicable: false
+    evidence: >-
+      No event, webhook or message-broker surface exists. Streaming is in-band chunking on the same
+      HTTP request, which AsyncAPI does not model. Not a penalty — genuinely N/A.
+  - id: mcp
+    conforms: false
+    evidence: >-
+      No MCP server. `POST /mcp` and `POST /v1/mcp` on api.secton.org both hit the soft-404
+      catch-all; mcp.secton.org does not resolve.
+compliance_programs:
+  certifications: []
+  searched:
+    - url: https://secton.org/security
+      status: 200
+      result: responsible-disclosure page only — no SOC 2, ISO 27001, PCI, HIPAA or FedRAMP claim
+    - url: https://secton.org/legal/privacy
+      status: 200
+      result: >-
+        Privacy Policy effective 2026-08-01 with sections on international data transfers, data
+        retention, California privacy rights and children's privacy — legal notices, not
+        certifications
+    - url: https://secton.org/legal/console-terms
+      status: 200
+      result: >-
+        Console Terms effective 2026-08-06, §16 Data Processing states "Where required, additional
+        data processing terms may apply" — no DPA is published
+    - url: https://trust.secton.org/
+      status: 0
+      result: host does not resolve
+  note: >-
+    A `TrustCenter` pointer is NOT emitted. probe-security-programs.py returned `trust=none`, and a
+    manual read of every legal page found no named certification.

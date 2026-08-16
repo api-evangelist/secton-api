@@ -1,0 +1,92 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  openapi/secton-api-chat-api-openapi.yml, openapi/secton-api-models-api-openapi.yml (derived
+  baseline via derive-authentication.py); upgraded from https://secton.org/legal/console-terms §6,
+  the first-party npm `secton` 1.0.2 README, and live probes of
+  https://api.secton.org/v1/models and /v1/chat/completions (2026-08-16)
+docs: https://console.secton.org/api
+docs_note: >-
+  The key-issuance page is a JavaScript-rendered console behind login — nothing about
+  authentication is readable there without an account. There is no public auth documentation page.
+  Every field below is evidenced from the OpenAPI, the Console Terms, the SDK, or a live response.
+summary:
+  types:
+    - apiKey
+  api_key_in:
+    - header
+  oauth2: false
+  oidc: false
+  mtls: false
+  scopes: false
+  scopes_note: >-
+    No scope or permission surface exists — the credential is all-or-nothing. scopes/ is
+    deliberately not written; forcing an empty OAuth-scope artifact would misrepresent the model.
+schemes:
+  - name: ApiKeyAuth
+    type: apiKey
+    in: header
+    parameter: Authorization
+    sources:
+      - openapi/secton-api-chat-api-openapi.yml
+      - openapi/secton-api-models-api-openapi.yml
+    issuance_url: https://console.secton.org/api
+    issuance_requires_account: true
+    key_prefix: not published, and not observable without an account
+    rotation: >-
+      Console Terms §6 makes the customer responsible for "promptly rotating compromised
+      credentials"; the rotation mechanism itself is inside the console and is not documented
+      publicly.
+    expiry: >-
+      Keys can expire or be revoked — the live 401 reads "Invalid or expired API key" — but no
+      lifetime or expiry policy is published.
+    transmitted_as:
+      documented: 'Authorization: <api key>'
+      also_accepted: 'Authorization: Bearer <api key>'
+      evidence: >-
+        Both forms returned the same `{"error":"Invalid or expired API key"}` 401 when probed with
+        a fabricated value on 2026-08-16, so the server tolerates either. The live "API key is
+        missing from bearer" message implies bearer is the intended form, which contradicts the
+        OpenAPI's raw-apiKey declaration.
+    sdk_env_var: SECTON_API_KEY
+    sdk_source: npm `secton` 1.0.2 README
+spec_defect:
+  issue: security is declared but never applied
+  detail: >-
+    The source document places the security requirement at `components.security`, which is not a
+    valid OpenAPI location — the requirement belongs at the document root or on each operation.
+    `components.securitySchemes.ApiKeyAuth` is defined correctly, but no operation references it.
+    A client generated from the published spec will therefore send NO credential and receive 401
+    on every call.
+  evidence: openapi/_original/secton-api-openapi.json
+  remediation: "overlays/secton-api-chat-api-overlay.yaml and overlays/secton-api-models-api-overlay.yaml add `security: [{ApiKeyAuth: []}]` at the root of each refined spec."
+customer_obligations:
+  source: https://secton.org/legal/console-terms §6 (effective 2026-08-06)
+  obligations:
+    - maintain the confidentiality of credentials
+    - implement appropriate security controls
+    - monitor usage associated with credentials
+    - promptly rotate compromised credentials
+    - limit access to authorized persons
+  prohibitions:
+    - credentials may not be shared publicly
+    - credentials may not be embedded in publicly accessible source code
+    - credentials may not be sold, leased, sublicensed or transferred
+  attribution: >-
+    "Activity performed using credentials issued to a workspace or Account may be attributed to the
+    applicable Customer."
+browser_exposure_risk:
+  cors_allows_authorization: true
+  observed:
+    access-control-allow-origin: '*'
+    access-control-allow-headers: Content-Type, Authorization
+  note: >-
+    Wildcard CORS plus an allowed `Authorization` header means the API is callable straight from a
+    browser with a raw key, and the SDK README demonstrates exactly that with an unpinned
+    `<script type="module">` import from unpkg. Doing so publishes the key to every visitor and
+    breaches Secton's own Console Terms §6. Consumers should proxy server-side.
+discovery:
+  oauth_authorization_server: not-served (404 / soft-404 on every host)
+  oauth_protected_resource: not-served
+  openid_configuration: not-served
+  see: well-known/secton-api-well-known.yml

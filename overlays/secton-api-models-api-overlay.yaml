@@ -1,0 +1,105 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements — Secton Models API
+  version: 1.0.0
+extends: ../openapi/secton-api-models-api-openapi.yml
+x-provenance:
+  generated: '2026-08-16'
+  method: generated
+  source: >-
+    Enhancements derived from live probes of https://api.secton.org/v1/models (2026-08-16), the
+    first-party npm `secton` 1.0.2 README, https://secton.org/blog/throb-deprecation, and
+    https://secton.org/legal/console-terms. The original specification is never mutated.
+actions:
+  - target: $.info
+    description: Add contact, terms and a real description.
+    update:
+      description: >-
+        Model discovery for the Secton inference API. A single GET returns the model identifiers
+        available to the calling API key, in the OpenAI `{"object":"list","data":[...]}` envelope.
+      contact:
+        name: Secton
+        url: https://console.secton.org/api
+        email: management@secton.org
+      termsOfService: https://secton.org/legal/console-terms
+
+  - target: $
+    description: >-
+      Apply the declared API-key scheme at the document root. The published spec defines
+      `ApiKeyAuth` but never applies it, so as written the operation reads as anonymous — while the
+      live API returns 401 without a key.
+    update:
+      security:
+        - ApiKeyAuth: []
+
+  - target: $.components.securitySchemes.ApiKeyAuth
+    description: Document how the credential is actually transmitted and where it is obtained.
+    update:
+      description: >-
+        API key issued at https://console.secton.org/api, sent in the `Authorization` request
+        header. Both `Authorization: <key>` and `Authorization: Bearer <key>` were accepted when
+        probed on 2026-08-16.
+
+  - target: $.paths['/v1/models'].get
+    description: Describe the operation and record that the list is unpaginated and key-scoped.
+    update:
+      description: >-
+        List the models available to the calling API key. The response is the complete set — there
+        is no cursor, page, limit or offset parameter, and no filtering. Visibility is scoped to
+        the credential, so two keys may see different lists.
+      x-pagination: none
+      x-agentic-access:
+        action-class: read
+        consequence: none
+        reversible: true
+
+  - target: $.paths['/v1/models'].get.responses
+    description: >-
+      Add the 401 the live API actually returns. The published spec declares only 200, so a
+      generated client has no error model.
+    update:
+      '401':
+        description: Missing, invalid or expired API key. Observed live 2026-08-16.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+            examples:
+              missing:
+                summary: No Authorization header
+                value:
+                  error: >-
+                    API key is missing from bearer. Get your API key at
+                    https://console.secton.org/api
+              invalid:
+                summary: Unrecognised or expired credential
+                value:
+                  error: Invalid or expired API key
+
+  - target: $.components.schemas
+    description: Add the error envelope the API returns but never declared.
+    update:
+      ErrorResponse:
+        type: object
+        description: >-
+          Secton's error envelope. Not RFC 9457, and carries no machine-readable code.
+        properties:
+          error:
+            type: string
+            description: Human-readable failure message.
+        required:
+          - error
+
+  - target: $.components.schemas.ModelSchema
+    description: >-
+      Record the only two model identifiers Secton has published anywhere. The live list could not
+      be enumerated because the endpoint requires a key.
+    update:
+      description: >-
+        A model available to the calling key. Secton publishes no model catalogue outside the
+        console; the only identifiers it has named in public are `throb-v1`
+        (https://secton.org/blog/throb-deprecation, 2025-07-27) and `copilot-zero` (the npm SDK
+        README example). Treat both as examples, not as an exhaustive list.
+      x-known-values:
+        - throb-v1
+        - copilot-zero

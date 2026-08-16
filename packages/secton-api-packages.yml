@@ -1,0 +1,89 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  https://registry.npmjs.org/secton (registry metadata),
+  https://registry.npmjs.org/secton/-/secton-1.0.2.tgz (README + package.json read from the published tarball)
+summary:
+  package_count: 1
+  official_count: 1
+  registries_searched:
+    - npm
+    - PyPI
+    - RubyGems
+    - crates.io
+    - NuGet
+    - Maven Central
+    - pkg.go.dev
+    - Packagist
+  registries_with_hits:
+    - npm
+  note: >-
+    Only one first-party client library was found in any public registry: the TypeScript/JavaScript SDK
+    `secton` on npm. No Python, Ruby, Go, Rust, PHP, Java or .NET client is published by Secton.
+    Searching npm for "secton" returns no other Secton-authored packages.
+packages:
+  - language: typescript
+    name: secton
+    registry: npm
+    url: https://www.npmjs.com/package/secton
+    official: true
+    version: 1.0.2
+    published: '2025-07-04'
+    first_published: '2025-06-05'
+    release_count: 3
+    license: MIT
+    repository: https://gitlab.com/wearesecton/secton-sdk
+    issues: https://gitlab.com/wearesecton/secton-sdk/-/issues
+    author: wearesecton
+    deprecated: true
+    deprecation_message: >-
+      Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+    covers:
+      - chat completions (blocking and streaming)
+      - model listing
+      - usage / credit balance
+      - client-side conversation + context management
+    note: >-
+      First-party: authored by "wearesecton", repository under gitlab.com/wearesecton, and the README
+      states it was "Created by Supernova3339, now officially maintained by Secton". EVERY published
+      version (1.0.0, 1.0.1, 1.0.2) carries an npm deprecation flag, and the newest release is
+      2025-07-04 — over thirteen months stale as of this pass, and published four months BEFORE the
+      2025-11-18 announcement that the API itself was being shut down (see lifecycle/). The README
+      points at https://platform.secton.org as the SDK's home, a host that now serves the same
+      console application rather than a docs site. The SDK also exposes `usage` and `conversations`
+      surfaces (credits available/total, usage alerts) that appear NOWHERE in the published OpenAPI —
+      see mcp/ and data-model/ for the divergence.
+    distribution_note: >-
+      The README also documents an unpinned CDN import,
+      `https://unpkg.com/secton@latest/dist/index.esm.js`. Because it floats to `@latest`, a browser
+      consumer cannot tell which build they receive; recorded here as a distribution finding, not a
+      second package.
+absent:
+  - registry: pypi
+    probed: https://pypi.org/pypi/secton/json
+    http_status: 404
+    result: no first-party package
+  - registry: rubygems
+    probed: https://rubygems.org/api/v1/gems/secton.json
+    http_status: 404
+    result: no first-party package
+  - registry: crates.io
+    probed: https://crates.io/api/v1/crates/secton
+    http_status: 404
+    result: no first-party package
+  - registry: nuget
+    probed: https://api.nuget.org/v3/registration5-semver1/secton/index.json
+    http_status: 404
+    result: no first-party package
+  - registry: maven-central
+    probed: https://search.maven.org/solrsearch/select?q=secton&rows=5&wt=json
+    http_status: 200
+    result: numFound 0 — no first-party artifact
+  - registry: go
+    probed: https://proxy.golang.org/gitlab.com/wearesecton/secton-sdk/@v/list
+    http_status: 200
+    result: empty version list — not published as a Go module
+  - registry: packagist
+    probed: https://packagist.org/search.json?q=secton
+    http_status: 200
+    result: no Secton-authored package in the result set

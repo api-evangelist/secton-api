@@ -1,0 +1,41 @@
+generated: '2026-08-16'
+method: generated
+source: >-
+  Generated from openapi/secton-api-chat-api-openapi.yml and
+  openapi/secton-api-models-api-openapi.yml, with runtime rules drawn from
+  conventions/secton-api-conventions.yml, errors/secton-api-problem-types.yml,
+  rate-limits/secton-api-rate-limits.yml and lifecycle/secton-api-lifecycle.yml.
+  Every operationId below was grepped from the specification; none is invented.
+provider_published_skills: none-found
+provider_published_note: >-
+  No provider-authored AGENTS.md, skills/ directory or agent instructions were found on any Secton
+  host or in the sectoncorp GitHub org (0 public repositories) or the wearesecton GitLab group
+  (group API 404s; only the secton-sdk project is reachable).
+skill_count: 2
+skills:
+  - name: secton-api-chat-completion
+    file: secton-api-chat-completion.md
+    api: secton-api:secton-api-chat-api
+    operations:
+      - post-external-api-v1-chat-completions
+    consequence: write
+    billable: true
+    idempotent: false
+    summary: >-
+      Generate a chat completion, blocking or streamed, with the correct auth header, the real
+      error envelope, and the retry rules this API actually supports.
+  - name: secton-api-list-models
+    file: secton-api-list-models.md
+    api: secton-api:secton-api-models-api
+    operations:
+      - get-external-api-v1-models
+    consequence: read
+    billable: false
+    idempotent: true
+    summary: >-
+      Discover which models a key can use, and validate a credential without spending credits — the
+      only safe health-check operation this API publishes.
+coverage:
+  openapi_operations: 2
+  operations_covered: 2
+  coverage_pct: 100

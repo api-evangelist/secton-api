@@ -1,0 +1,153 @@
+generated: '2026-08-16'
+method: derived
+source: >-
+  openapi/_original/secton-api-openapi.json,
+  openapi/secton-api-chat-api-openapi.yml,
+  openapi/secton-api-models-api-openapi.yml;
+  divergence notes from the first-party npm `secton` 1.0.2 type surface
+summary:
+  entity_count: 6
+  relationship_count: 5
+  id_prefixes_published: false
+  note: >-
+    A small, message-oriented model with no persisted server-side resources. Nothing in the
+    published contract has a durable identifier a client can fetch later — `ChatCompletion.id` is
+    returned but there is no `GET /v1/chat/completions/{id}`. The API is stateless per call.
+entities:
+  - name: Model
+    schema: ModelSchema
+    source: openapi/secton-api-models-api-openapi.yml
+    identifier: id
+    identifier_type: string
+    id_prefix: none published
+    fields:
+      - {name: id, type: string, required: true}
+      - {name: object, type: string, required: true, const: model}
+    known_values:
+      - value: throb-v1
+        source: https://secton.org/blog/throb-deprecation
+        note: >-
+          "throb-v1 will remain available for developers interacting through the Secton API even
+          after the shutdown" (2025-07-27).
+      - value: copilot-zero
+        source: "npm `secton` 1.0.2 README (`model: 'copilot-zero'` in the conversation example)"
+    note: >-
+      The live model list could not be enumerated — GET /v1/models requires a key. The two values
+      above are the only model identifiers Secton has published anywhere.
+  - name: ModelList
+    schema: ModelsResponseSchema
+    source: openapi/secton-api-models-api-openapi.yml
+    kind: envelope
+    fields:
+      - {name: object, type: string, required: true, const: list}
+      - {name: data, type: array, required: true, items: ModelSchema}
+  - name: ChatMessage
+    schema: ChatMessageSchema
+    source: openapi/secton-api-chat-api-openapi.yml
+    kind: value-object
+    fields:
+      - {name: role, type: string, required: true, enum: [system, user, assistant]}
+      - {name: content, type: string, required: true}
+  - name: ChatCompletionRequest
+    schema: ChatCompletionRequestSchema
+    source: openapi/secton-api-chat-api-openapi.yml
+    kind: request
+    fields:
+      - {name: model, type: string, required: true}
+      - {name: messages, type: array, required: true, items: ChatMessageSchema, min_items: 1}
+      - {name: temperature, type: number, required: false, default: 0.7}
+      - {name: stream, type: boolean, required: false, default: false}
+      - {name: max_tokens, type: integer, required: false, minimum: 0, maximum: 4096}
+  - name: ChatCompletion
+    schema: ChatCompletionResponseSchema
+    source: openapi/secton-api-chat-api-openapi.yml
+    identifier: id
+    identifier_type: string
+    id_prefix: none published
+    persisted: false
+    fields:
+      - {name: id, type: string, required: true}
+      - {name: object, type: string, required: true, const: chat.completion}
+      - {name: created, type: number, required: true}
+      - {name: model, type: string, required: true}
+      - {name: choices, type: array, required: true}
+      - {name: 'choices[].index', type: number, required: true}
+      - {name: 'choices[].message', type: object, required: true, shape: '{role: assistant, content: string}'}
+      - {name: 'choices[].finish_reason', type: string, required: true}
+      - {name: usage, type: object, required: true}
+      - {name: 'usage.prompt_tokens', type: number, required: true}
+      - {name: 'usage.completion_tokens', type: number, required: true}
+      - {name: 'usage.total_tokens', type: number, required: true}
+  - name: ChatCompletionChunk
+    schema: ChatCompletionChunkSchema
+    source: openapi/_original/secton-api-openapi.json
+    kind: streaming-frame
+    orphaned: true
+    fields:
+      - {name: id, type: string, required: true}
+      - {name: object, type: string, required: true, const: chat.completion.chunk}
+      - {name: created, type: number, required: true}
+      - {name: model, type: string, required: true}
+      - {name: 'choices[].index', type: number, required: true}
+      - {name: 'choices[].delta', type: object, required: true, shape: '{role?: string, content?: string}'}
+      - {name: 'choices[].finish_reason', type: 'string|null', required: true}
+    note: >-
+      Defined in `components.schemas` but reachable only through the malformed response key
+      `"200 ChatCompletionChunkSchema"`, whose `$ref` targets a non-existent
+      `components.responses` entry. The refine step dropped it from the chat spec's components as
+      unreferenced, so the streaming frame survives only in openapi/_original/. Corrected in
+      overlays/secton-api-chat-api-overlay.yaml.
+relationships:
+  - from: ModelList
+    to: Model
+    type: has_many
+    via: data[]
+    binding: '$ref'
+  - from: ChatCompletionRequest
+    to: ChatMessage
+    type: has_many
+    via: messages[]
+    binding: '$ref'
+  - from: ChatCompletionRequest
+    to: Model
+    type: belongs_to
+    via: model
+    binding: id-reference
+    confidence: high
+    note: >-
+      `model` is a plain string, not a typed reference, but its values are the `id`s returned by
+      GET /v1/models — the only cross-resource key in the entire contract.
+  - from: ChatCompletion
+    to: Model
+    type: belongs_to
+    via: model
+    binding: id-reference
+    confidence: high
+  - from: ChatCompletionChunk
+    to: Model
+    type: belongs_to
+    via: model
+    binding: id-reference
+    confidence: high
+undocumented_surface:
+  note: >-
+    The first-party SDK exposes entities that appear in NO published contract. Recorded as a
+    divergence, not modelled — no schema for them has ever been published.
+  entities:
+    - name: Usage
+      evidence: '`client.usage.get()` → `{ creditsAvailable, creditsTotal }`; `client.usage.getAlerts()` → alerts with a `message`.'
+      source: npm `secton` 1.0.2 README
+      in_openapi: false
+    - name: RecommendedModels
+      evidence: '`client.models.getRecommended()`'
+      source: npm `secton` 1.0.2 README
+      in_openapi: false
+    - name: Conversation
+      evidence: '`client.conversations.create/addMessage/getMessages/updateConfig/export/import`'
+      source: npm `secton` 1.0.2 README
+      in_openapi: false
+      server_side: false
+      note: >-
+        Client-side only — the SDK README describes conversations as local context management with
+        sliding/priority/summarization strategies, not a server resource. Listed so a reader does
+        not mistake it for a missing endpoint.

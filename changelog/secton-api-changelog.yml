@@ -1,0 +1,64 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  https://secton.org/blog (index + each post), probes of https://secton.org/changelog (404),
+  https://console.secton.org/changelog (404), https://changelog.secton.org (NXDOMAIN)
+scheme: none
+current_version: '1.0.0'
+current_version_source: openapi/_original/secton-api-openapi.json (info.version)
+entry_count: 0
+entries: []
+finding: >-
+  Secton publishes NO API changelog or release notes. There is a company blog with five posts, but
+  it carries product announcements and incident write-ups, not per-release API changes. No entry on
+  it describes an added, changed or removed endpoint, field or model. The published OpenAPI has sat
+  at info.version 1.0.0 with no version history anywhere.
+evidence:
+  - url: https://secton.org/changelog
+    status: 404
+  - url: https://console.secton.org/changelog
+    status: 404
+  - url: https://changelog.secton.org
+    status: 0
+    note: host does not resolve
+  - url: https://secton.org/blog
+    status: 200
+    note: company blog, five posts, no release notes
+irony_note: >-
+  Secton's own 2025-06-30 post announces a partnership with Changerawr — a changelog publishing
+  product — in which Secton's Copilot generates release notes for other teams
+  (https://secton.org/blog/secton-x-changerawr). Secton publishes none for its own API.
+blog_posts:
+  note: >-
+    Recorded for provenance because they are the only dated first-party record of change. They are
+    NOT release notes and this artifact deliberately reports entry_count 0 rather than dressing
+    them up as one.
+  posts:
+    - date: '2025-11-18'
+      url: https://secton.org/blog/a-new-chapter
+      title: A New Chapter for Secton
+      kind: product-shutdown
+    - date: '2025-10-07'
+      url: https://secton.org/blog/addressing-what-happened-back-in-june
+      title: Addressing What Happened Back in June
+      kind: security-postmortem
+    - date: '2025-07-27'
+      url: https://secton.org/blog/throb-deprecation
+      title: Winding Down Throb.dev
+      kind: product-deprecation
+    - date: '2025-07-02'
+      url: https://secton.org/blog/why-everything-went-down-for-24-hours
+      title: Why Our Services Went Down for 24 Hours
+      kind: incident-postmortem
+      summary: >-
+        A 2025-06-28 outage took every Secton service down for roughly 24 hours, attributed to
+        Secton's own usage of the database provider Neon after an unexpected internal compute spike.
+    - date: '2025-06-30'
+      url: https://secton.org/blog/secton-x-changerawr
+      title: Secton × Changerawr
+      kind: partnership
+pointer_emitted: false
+pointer_note: >-
+  No `ChangeLog` pointer is wired into apis.yml. The `change_log_present` check (6 pts) asserts the
+  provider publishes a dated record of API changes; a five-post company blog with no release notes
+  is not that.

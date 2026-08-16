@@ -1,10 +1,17 @@
 name: Secton API
 description: >-
-  A developer-first AI platform providing an OpenAI-compatible inference API for embedding AI into apps — chatbots,
-  copilots, and smart features via chat-completions and models endpoints, plus a first-party TypeScript SDK.
+  Secton API is the OpenAI-compatible inference surface from Secton, a small developer-tools company
+  operating at secton.org. It publishes two REST operations — POST /v1/chat/completions, with optional
+  incremental streaming, and GET /v1/models — behind a static API key issued in the Secton Console and
+  sent in the Authorization header. A first-party TypeScript SDK ("secton" on npm) wraps chat, model
+  listing, credit usage and client-side conversation context management. Secton announced a permanent
+  shutdown of the API on 2025-11-18 with an end date of 2025-12-19, yet the host, the OpenAPI and the
+  status page remain live and the Console Terms of Service governing API keys were re-issued effective
+  2026-08-06 — see lifecycle/secton-api-lifecycle.yml before building on it.
+image: https://cdn.secton.org/website-assets/summary_large_image.jpg
 url: https://secton-api.apievangelist.com/apis.yml
 created: '2026-08-13'
-modified: '2026-08-13'
+modified: '2026-08-16'
 specificationVersion: '0.21'
 tags:
   - ai
@@ -13,6 +20,9 @@ tags:
   - chat-completions
   - generative-ai
   - developer-tools
+  - openai-compatible
+  - streaming
+  - machine-learning
   - api
 apis:
 - aid: secton-api:secton-api-chat-api
@@ -27,6 +37,10 @@ apis:
     url: openapi/secton-api-chat-api-openapi.yml
   - type: Documentation
     url: https://console.secton.org/api
+  - type: Overlay
+    url: overlays/secton-api-chat-api-overlay.yaml
+  - type: AgentSkill
+    url: skills/secton-api-chat-completion.md
 - aid: secton-api:secton-api-models-api
   name: Secton API Models API
   description: The Models API from Secton API — 1 operation(s) for models.
@@ -39,11 +53,90 @@ apis:
     url: openapi/secton-api-models-api-openapi.yml
   - type: Documentation
     url: https://console.secton.org/api
+  - type: Overlay
+    url: overlays/secton-api-models-api-overlay.yaml
+  - type: AgentSkill
+    url: skills/secton-api-list-models.md
 maintainers:
   - FN: Secton
+    email: management@secton.org
     url: https://github.com/sectoncorp
 generated:
   by: apis.io/add
   model: claude-opus-4-8
   confidence: 95
   at: '2026-08-13T10:46:31.364Z'
+common:
+- type: DomainSecurity
+  url: security/secton-api-domain-security.yml
+- type: Authentication
+  url: authentication/secton-api-authentication.yml
+- type: DeveloperPortal
+  url: https://console.secton.org/api
+- type: Documentation
+  url: https://console.secton.org/api
+- type: Blog
+  url: https://secton.org/blog
+- type: Support
+  url: https://secton.org/contact
+- type: GitHubOrganization
+  url: https://github.com/sectoncorp
+- type: SourceCode
+  url: https://gitlab.com/wearesecton/secton-sdk
+- type: Login
+  url: https://console.secton.org/login
+- type: TermsOfService
+  url: https://secton.org/legal/console-terms
+- type: PrivacyPolicy
+  url: https://secton.org/legal/privacy
+- type: Packages
+  url: packages/secton-api-packages.yml
+- type: SDKs
+  url: packages/secton-api-packages.yml
+- type: Lifecycle
+  url: lifecycle/secton-api-lifecycle.yml
+- type: StatusPage
+  url: https://status.secton.org
+- type: Deprecation
+  url: lifecycle/secton-api-lifecycle.yml
+- type: VulnerabilityDisclosure
+  url: security/secton-api-vulnerability-disclosure.yml
+- type: Security
+  url: security/secton-api-vulnerability-disclosure.yml
+- type: Conformance
+  url: conformance/secton-api-conformance.yml
+- type: ErrorCatalog
+  url: errors/secton-api-problem-types.yml
+- type: Conventions
+  url: conventions/secton-api-conventions.yml
+- type: DataModel
+  url: data-model/secton-api-data-model.yml
+- type: LLMsTxt
+  url: llms/secton-api-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Plans
+  url: plans/secton-api-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/secton-api-rate-limits.yml
+x-enrichment:
+  date: '2026-08-16'
+  status: enriched
+  artifacts_added: 20
+  pass: local-v1
+  pointers_deliberately_withheld:
+    note: >-
+      Each artifact below exists on disk and records a real, evidenced ABSENCE. No canonical pointer
+      is wired for it, because the pointer would assert a surface Secton does not serve.
+    MCPServer: mcp/secton-api-mcp.yml — no MCP server exists; the file holds a derived candidate tool list only
+    WellKnown: well-known/secton-api-well-known.yml — every /.well-known/ path misses on every host
+    SecurityTxt: no security.txt is served, despite an active HackerOne disclosure intake
+    AgentCard: no agent card at /.well-known/agent-card.json or /.well-known/agent.json on any host
+    Idempotency: conventions/secton-api-conventions.yml — no idempotency key on the billable POST
+    ChangeLog: changelog/secton-api-changelog.yml — no API changelog or release notes are published
+    Pricing: plans/secton-api-plans-pricing.yml — no pricing page exists (secton.org/pricing 404s)
+    Compliance: conformance/secton-api-conformance.yml — no certification or audit is published
+    TrustCenter: no trust centre; trust.secton.org does not resolve
+    AsyncAPI: no event, webhook or message surface — genuinely N/A, streaming is in-band
+    OAuthScopes: authentication is a single all-or-nothing API key; there is no scope surface
+    ToolCrosswalk: nothing to cross-walk without an MCP or GraphQL surface

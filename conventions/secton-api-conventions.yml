@@ -1,0 +1,143 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  openapi/_original/secton-api-openapi.json,
+  npm `secton` 1.0.2 README + package.json (first-party SDK, read from the published tarball),
+  https://secton.org/legal/console-terms,
+  live unauthenticated probes of https://api.secton.org/v1/models and /v1/chat/completions
+summary:
+  shape: OpenAI-compatible inference API
+  base_url: https://api.secton.org
+  sdk_base_url: https://api.secton.org/v1
+  note: >-
+    Secton publishes no prose developer documentation on a public host — console.secton.org/api is a
+    JavaScript-rendered console page behind login. Every convention below is therefore established
+    from the published OpenAPI, the first-party npm SDK, the Console Terms, or a live response, and
+    each row names which.
+authentication:
+  style: api-key-as-bearer
+  transport: 'Authorization request header'
+  scheme_name: ApiKeyAuth
+  openapi_declaration: 'apiKey / in: header / name: Authorization'
+  sdk_env_var: SECTON_API_KEY
+  issuance: https://console.secton.org/api
+  key_prefix: unknown — not published, and not observable without an account
+  evidence: >-
+    OpenAPI components.securitySchemes.ApiKeyAuth; SDK README `createClient({ apiKey })`; live 401
+    body "API key is missing from bearer."
+  spec_gap: >-
+    The OpenAPI declares `security` under `components.security` — an invalid location — instead of
+    at the root or per-operation. As written, NO operation actually applies ApiKeyAuth, even though
+    every operation requires it in production. See overlays/ for the correction.
+  cross_ref: authentication/secton-api-authentication.yml
+idempotency:
+  supported: false
+  header: null
+  scope: null
+  retention: null
+  evidence: >-
+    No `Idempotency-Key` (or equivalent) parameter appears in either operation, no idempotency
+    header is documented in the SDK, and the SDK's own retry logic ("exponential backoff with
+    jitter") retries without any idempotency token. For a POST /v1/chat/completions endpoint that
+    consumes credits, a retried request is a second billable generation.
+  pointer_emitted: false
+  note: >-
+    No `Idempotency` pointer is wired into apis.yml. Emitting one would assert a safe-retry contract
+    that Secton does not offer.
+pagination:
+  supported: false
+  style: none
+  evidence: >-
+    `GET /v1/models` returns the complete `{"object":"list","data":[...]}` envelope with no cursor,
+    page, limit or offset parameter. No other collection endpoint is published.
+filtering_sorting:
+  supported: false
+  evidence: "Neither published operation declares any query parameter (`parameters: []` on both)."
+field_expansion:
+  supported: false
+metadata:
+  supported: false
+  note: No free-form `metadata` object on the request or response schemas.
+request_tracing:
+  request_id_header: not-observed
+  correlation_id: not-observed
+  observed_response_headers:
+    - date
+    - content-type
+    - x-frame-options
+    - x-middleware-rewrite
+    - cf-ray
+    - server
+    - nel
+    - report-to
+  note: >-
+    No `X-Request-Id`, `Request-Id` or `Traceparent` is returned. The only per-request identifier an
+    operator could quote to support is Cloudflare's `cf-ray`, which is edge infrastructure, not an
+    application trace ID. `x-middleware-rewrite` leaks the internal route
+    (`/external-api/v1/chat/completions`) — an information-disclosure nit worth reporting.
+versioning:
+  style: url-path
+  current: v1
+  cross_ref: lifecycle/secton-api-lifecycle.yml
+error_envelope:
+  format: custom
+  rfc9457: false
+  media_type: application/json
+  shape: '{"error": "<human-readable string>"}'
+  alternate_shape: '{"message": "<human-readable string>"}'
+  alternate_shape_note: >-
+    The soft-404 catch-all uses `message`, not `error`, so a client must handle two different
+    envelope keys depending on whether the route exists.
+  machine_readable_code: false
+  note: >-
+    No `type`, `title`, `status`, `detail`, `instance`, nor any stable error `code`. A client can
+    only branch on the HTTP status and on English prose. The first-party SDK compensates by
+    inferring typed exceptions (AuthenticationError, RateLimitError, NetworkError) client-side.
+  cross_ref: errors/secton-api-problem-types.yml
+rate_limit_signaling:
+  documented_headers: none
+  observed_headers: none
+  observed_on: 401 responses only (no authenticated observation was possible)
+  retry_after: >-
+    Indirect evidence only — the SDK exposes `RateLimitError.retryAfter`, which implies the API
+    returns a `Retry-After` header (or a retry hint in the body) on throttling. Unverified.
+  exhaustion_status: presumed 429, unverified
+  cross_ref: rate-limits/secton-api-rate-limits.yml
+streaming:
+  supported: true
+  mechanism: server-sent-style incremental chunks over the same POST /v1/chat/completions
+  trigger: '`stream: true` in the request body (schema default false)'
+  chunk_schema: ChatCompletionChunkSchema
+  chunk_object_value: chat.completion.chunk
+  spec_gap: >-
+    The streaming response is declared under the malformed response key
+    `"200 ChatCompletionChunkSchema"`, which `$ref`s
+    `#/components/responses/200 ChatCompletionChunkSchema` — a component that does not exist
+    (`components.responses` is `{}`). The streaming contract is therefore UNRESOLVABLE from the
+    published spec; only the orphaned `ChatCompletionChunkSchema` in `components.schemas` describes
+    it. Corrected in overlays/.
+cors:
+  enabled: true
+  observed_on: POST https://api.secton.org/v1/chat/completions
+  headers:
+    access-control-allow-origin: '*'
+    access-control-allow-methods: POST, OPTIONS
+    access-control-allow-headers: Content-Type, Authorization
+  note: >-
+    Wildcard CORS with `Authorization` allowed means the API is designed to be callable from a
+    browser with a raw API key — consistent with the SDK README's `<script type="module">` example.
+    That is a real capability and also a real key-exposure hazard for consumers; Secton's own
+    Console Terms §6 forbids embedding credentials in publicly accessible source.
+content_negotiation:
+  request: application/json
+  response: application/json
+usage_accounting:
+  in_response: true
+  fields:
+    - usage.prompt_tokens
+    - usage.completion_tokens
+    - usage.total_tokens
+  balance_endpoint: >-
+    Not in the OpenAPI. The SDK exposes `client.usage.get()` returning
+    `creditsAvailable`/`creditsTotal` and `client.usage.getAlerts()`, implying an undocumented
+    usage/credits endpoint. See data-model/ and mcp/ for the surface divergence.

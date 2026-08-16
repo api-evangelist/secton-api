@@ -1,0 +1,180 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements — Secton Chat API
+  version: 1.0.0
+extends: ../openapi/secton-api-chat-api-openapi.yml
+x-provenance:
+  generated: '2026-08-16'
+  method: generated
+  source: >-
+    Enhancements derived from live probes of https://api.secton.org/v1/chat/completions (2026-08-16),
+    the first-party npm `secton` 1.0.2 README, https://secton.org/legal/console-terms, and
+    openapi/_original/secton-api-openapi.json. The original specification is never mutated.
+  note: >-
+    Three of these actions repair defects rather than add colour: the published spec applies NO
+    security to any operation (it puts `security` under `components.security`, an invalid
+    location), declares NO error responses although the live API returns 401, and describes the
+    streaming response through an unresolvable `$ref`. See conformance/ and errors/.
+actions:
+  - target: $.info
+    description: Add contact, licence-free provenance and a real description.
+    update:
+      description: >-
+        OpenAI-compatible chat-completions API from Secton. A single POST operation generates a
+        model response for a message list, with optional incremental streaming. Authentication is a
+        static API key issued in the Secton Console and sent in the `Authorization` header. Errors
+        are returned as `{"error": "<string>"}`, not RFC 9457 problem+json.
+      contact:
+        name: Secton
+        url: https://console.secton.org/api
+        email: management@secton.org
+      termsOfService: https://secton.org/legal/console-terms
+
+  - target: $
+    description: >-
+      Apply the declared API-key scheme at the document root. The published spec defines
+      `ApiKeyAuth` but never applies it, so as written every operation reads as anonymous — while
+      the live API returns 401 without a key.
+    update:
+      security:
+        - ApiKeyAuth: []
+
+  - target: $.components.securitySchemes.ApiKeyAuth
+    description: Document how the credential is actually transmitted and where it is obtained.
+    update:
+      description: >-
+        API key issued at https://console.secton.org/api. Sent in the `Authorization` request
+        header. Probing 2026-08-16 showed the server accepts both the bare key
+        (`Authorization: <key>`) and a bearer form (`Authorization: Bearer <key>`); the live
+        error text refers to a "bearer", so the bearer form is the safer default.
+
+  - target: $.paths['/v1/chat/completions'].post
+    description: Give the operation a real description and record its retry semantics.
+    update:
+      description: >-
+        Create a chat completion. Set `stream: true` to receive incremental
+        `chat.completion.chunk` frames instead of a single `chat.completion` object. Consumes
+        credits on the calling account.
+      x-idempotent: false
+      x-retry-safety: >-
+        Not safely retryable. There is no idempotency key, so a retried request produces a second
+        billable generation. The first-party SDK retries with exponential backoff by default
+        (`retries: 3`) — consumers who need at-most-once semantics must disable it.
+      x-agentic-access:
+        action-class: write
+        consequence: billable
+        reversible: false
+
+  - target: $.paths['/v1/chat/completions'].post.responses
+    description: >-
+      Add the error responses the live API actually returns. The published spec declares only 200,
+      which means a generated client has no error model at all.
+    update:
+      '401':
+        description: >-
+          Missing, invalid or expired API key. Observed live 2026-08-16.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+            examples:
+              missing:
+                summary: No Authorization header
+                value:
+                  error: >-
+                    API key is missing from bearer. Get your API key at
+                    https://console.secton.org/api
+              invalid:
+                summary: Unrecognised or expired credential
+                value:
+                  error: Invalid or expired API key
+      '429':
+        description: >-
+          Rate limited. INFERRED, NOT OBSERVED — the first-party SDK exports a `RateLimitError`
+          carrying `retryAfter`, so the API signals throttling, but the status code and envelope
+          could not be reproduced without an authenticated key.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErrorResponse'
+
+  - target: $.components.schemas
+    description: >-
+      Add the error envelope (the API returns one but never declared it) and restore
+      ChatCompletionChunkSchema, which the refine step dropped because the only reference to it was
+      the broken one.
+    update:
+      ErrorResponse:
+        type: object
+        description: >-
+          Secton's error envelope. Not RFC 9457. There is no machine-readable code — clients must
+          branch on the HTTP status and English prose.
+        properties:
+          error:
+            type: string
+            description: Human-readable failure message.
+        required:
+          - error
+      ChatCompletionChunkSchema:
+        type: object
+        description: >-
+          One incremental frame of a streamed completion, emitted when the request sets
+          `stream: true`. Restored verbatim from openapi/_original/secton-api-openapi.json.
+        properties:
+          id:
+            type: string
+          object:
+            type: string
+            enum:
+              - chat.completion.chunk
+          created:
+            type: number
+          model:
+            type: string
+          choices:
+            type: array
+            items:
+              type: object
+              properties:
+                index:
+                  type: number
+                delta:
+                  type: object
+                  properties:
+                    role:
+                      type: string
+                    content:
+                      type: string
+                finish_reason:
+                  type: string
+                  nullable: true
+              required:
+                - index
+                - delta
+                - finish_reason
+        required:
+          - id
+          - object
+          - created
+          - model
+          - choices
+
+  - target: $.paths['/v1/chat/completions'].post.responses['200 ChatCompletionChunkSchema']
+    description: >-
+      Remove the malformed response key. "200 ChatCompletionChunkSchema" is not a valid status code
+      or `default`, and it $refs `#/components/responses/200 ChatCompletionChunkSchema`, which does
+      not exist — `components.responses` is an empty object. The streaming contract is therefore
+      unresolvable as published; it is re-expressed as `x-streaming` on the operation below.
+    remove: true
+
+  - target: $.paths['/v1/chat/completions'].post
+    description: Re-express the streaming contract in a resolvable way.
+    update:
+      x-streaming:
+        trigger: 'request body `stream: true`'
+        frame_schema: '#/components/schemas/ChatCompletionChunkSchema'
+        terminal_signal: '`choices[].finish_reason` becomes non-null'
+        note: >-
+          Documented here rather than as a response object because OpenAPI 3.x cannot express two
+          different bodies for the same status code without a content-type or `oneOf` split, and
+          Secton returns both under `application/json`.

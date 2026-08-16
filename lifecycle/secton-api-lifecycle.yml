@@ -1,0 +1,142 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  https://secton.org/blog/a-new-chapter,
+  https://secton.org/legal/console-terms,
+  https://status.secton.org/,
+  live probes of https://api.secton.org/v1/models and https://api.secton.org/v1/chat/completions
+headline: >-
+  Secton publicly announced the PERMANENT SHUTDOWN of Secton API on 2025-11-18 with a stated
+  operational end date of 2025-12-19 — and yet, as of 2026-08-16, the API host still answers, the
+  OpenAPI is still served, the status page still monitors "API" as operational, and the Console
+  Terms of Service governing API keys were re-issued effective 2026-08-06. Both facts are recorded
+  here because neither has been retracted by the provider. Any consumer should treat the lifecycle
+  posture of this API as UNRESOLVED and confirm directly with Secton before building on it.
+versioning:
+  scheme: url-path
+  current: v1
+  evidence: 'All published operations sit under /v1/ (/v1/chat/completions, /v1/models).'
+  spec_version: '1.0.0'
+  spec_version_source: openapi/_original/secton-api-openapi.json (info.version)
+  policy_published: false
+  policy_note: >-
+    No standalone versioning policy page. Console Terms §5 states "Features, models, APIs,
+    functionality, limits, interfaces, and availability may change" and "Nothing in these Terms
+    obligates us to continue offering any particular Service, feature, API version, model,
+    capability, or integration for any specific period of time."
+deprecation:
+  policy_published: false
+  notice_published: true
+  headers:
+    sunset_rfc8594: not-observed
+    deprecation_header: not-observed
+    observed_on:
+      - 'GET https://api.secton.org/v1/models (401)'
+      - 'POST https://api.secton.org/v1/chat/completions (401)'
+    note: >-
+      Neither `Sunset:` nor `Deprecation:` appears on live responses. Only unauthenticated 401
+      responses could be inspected, so this is evidence about the edge, not about authenticated
+      responses.
+  notice_terms: >-
+    Console Terms §5: "Reasonable efforts may be made to provide notice before material changes,
+    but advance notice is not guaranteed in all circumstances." Console Terms §14 adds that
+    "Nothing in these Terms guarantees the continued availability of any free tier, trial,
+    promotional program, credit allocation, or complimentary usage allowance."
+  announcements:
+    - date: '2025-11-18'
+      url: https://secton.org/blog/a-new-chapter
+      title: A New Chapter for Secton
+      scope:
+        - Copilot
+        - Secton Platform
+        - Secton API
+      shutdown_begins: '2025-11-19'
+      api_operational_until: '2025-12-19'
+      data_deleted_after: '2025-12-19'
+      notice_period_days: 1
+      quote: >-
+        "We're permanently shutting down Copilot, Secton Platform, and Secton API. … The services
+        listed above will begin shutting down on November 19, 2025 and will fully wind down over
+        the following weeks. The API will remain operational until December 19, 2025 to give teams
+        time to transition. Your data will remain accessible until December 19, 2025, after which
+        it will be permanently deleted."
+      rationale_quote: >-
+        "Tech-first, not AI-first! We're back to just building tech we care about."
+    - date: '2025-07-27'
+      url: https://secton.org/blog/throb-deprecation
+      title: Winding Down Throb.dev
+      scope:
+        - Throb.dev
+      shutdown_date: '2025-08-27'
+      notice_period_days: 31
+      quote: >-
+        "On August 27, 2025, we will officially deprecate Throb.dev, our AI coding assistant for
+        developers. … throb-v1 will remain available for developers interacting through the Secton
+        API even after the shutdown."
+      note: >-
+        A separate, earlier product wind-down, announced 31 days ahead with an explicit
+        continue-to-work carve-out for the `throb-v1` model on the API. Recorded as evidence that
+        Secton does publish dated deprecation notices as a practice, which is the substance the
+        `Deprecation` pointer asserts.
+contradicting_evidence:
+  note: >-
+    Everything below was observed on 2026-08-16, eight months after the announced permanent
+    shutdown. It is not a claim that the API was un-retired — it is the raw evidence, unreconciled.
+  observations:
+    - what: API host answers
+      url: https://api.secton.org/
+      status: 200
+      body: '{"message":"Well met!"}'
+    - what: API returns a real auth challenge, not a tombstone
+      url: https://api.secton.org/v1/models
+      status: 401
+      body: >-
+        {"error":"API key is missing from bearer. Get your API key at
+        https://console.secton.org/api"} — it still directs callers to obtain a key.
+    - what: OpenAPI still served
+      url: https://console.secton.org/openapi.json
+      status: 200
+      note: byte-identical to openapi/_original/secton-api-openapi.json
+    - what: Console Terms of Service re-issued, governing API keys and usage limits
+      url: https://secton.org/legal/console-terms
+      status: 200
+      effective: '2026-08-06'
+    - what: Privacy Policy re-issued
+      url: https://secton.org/legal/privacy
+      status: 200
+      effective: '2026-08-01'
+    - what: Copilot Usage Policy re-issued — Copilot was also named in the shutdown
+      url: https://secton.org/legal/copilot-usage
+      status: 200
+      effective: '2026-02-25'
+    - what: Status page actively monitors an "API" component
+      url: https://status.secton.org/
+      status: 200
+      note: '"All services are online … Last updated on Aug 16, 2026" — API 100% uptime over 90 days.'
+status_page:
+  url: https://status.secton.org/
+  status: 200
+  provider: Better Stack
+  components:
+    - API
+    - Console
+    - Primary Data Center
+    - Node 2
+  history_window_days: 90
+  current_state: All services are online
+  incident_history_published: true
+  subscribe_supported: unknown
+  machine_readable_feed: not-found
+  note: >-
+    A separate status host exists and is linked from nowhere on secton.org — it was found by
+    probing status.secton.org directly. Secton should link it from the site footer and the console.
+sla:
+  published: false
+  note: >-
+    No uptime commitment or service-credit schedule is published. Console Terms §21 disclaims any
+    "warranty, service commitment, availability guarantee, or representation regarding performance"
+    for Beta/preview services, and §24 carries a general disclaimer.
+deprecated_operations:
+  count: 0
+  source: openapi/secton-api-chat-api-openapi.yml, openapi/secton-api-models-api-openapi.yml
+  note: 'No operation in either refined spec carries `deprecated: true`.'

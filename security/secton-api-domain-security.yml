@@ -1,0 +1,21 @@
+generated: '2026-08-16'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: console.secton.org
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 30 19:15:56 2026 GMT
+  hsts: false
+- host: api.secton.org
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 30 19:15:56 2026 GMT
+  hsts: false
+domains:
+- domain: secton.org
+  dnssec: true
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

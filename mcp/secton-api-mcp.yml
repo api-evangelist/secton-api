@@ -1,0 +1,96 @@
+generated: '2026-08-16'
+method: derived
+source: >-
+  derived from openapi/secton-api-chat-api-openapi.yml and
+  openapi/secton-api-models-api-openapi.yml after live search found no published MCP server
+status: candidate
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: api-key
+  verified: probed
+  note: >-
+    Secton ships NO MCP server — neither a remote endpoint nor a local stdio package. The tools
+    below are a CANDIDATE mapping derived from the published OpenAPI so the surface can be reasoned
+    about; they are not something an agent can call today. `auth: api-key` records what such a
+    server would need (the same `Authorization` API key the REST API takes), not an auth mode any
+    live server offers.
+search:
+  result: not-found
+  probes:
+    - url: https://api.secton.org/mcp
+      method: 'POST tools/list'
+      status: 200
+      result: miss
+      evidence: 'soft-404 body `{"message":"The /mcp endpoint doesn''t exist!"}`'
+    - url: https://api.secton.org/v1/mcp
+      method: 'POST tools/list'
+      status: 200
+      result: miss
+      evidence: soft-404 body
+    - url: https://console.secton.org/mcp
+      method: 'POST tools/list'
+      status: 404
+      result: miss
+    - url: https://mcp.secton.org/mcp
+      method: 'POST tools/list'
+      status: 0
+      result: miss — host does not resolve
+    - url: https://api.secton.org/.well-known/oauth-protected-resource
+      status: 200
+      result: miss — soft-404 body
+    - url: https://console.secton.org/.well-known/oauth-authorization-server
+      status: 404
+      result: miss
+  registries_searched:
+    - npm (`secton` scope and keyword search — only the deprecated `secton` SDK exists)
+    - github.com/sectoncorp (0 public repositories)
+    - gitlab.com/wearesecton (group API returns 404; only the secton-sdk project is reachable)
+  pointer_emitted: false
+  pointer_note: >-
+    No `MCPServer` pointer is wired into apis.yml. The `mcp_server_present` (4 pts) and agent
+    readiness `mcp_server` (12 pts) checks assert that an agent can reach this provider over MCP.
+    Nothing here can be reached, so emitting the pointer would manufacture an agent surface.
+candidate_tools:
+  - name: create_chat_completion
+    description: >-
+      Generate a model response for a conversation. Supports incremental streaming when `stream` is
+      true.
+    rest:
+      operationId: post-external-api-v1-chat-completions
+      method: POST
+      path: /v1/chat/completions
+      spec: openapi/secton-api-chat-api-openapi.yml
+    input_schema_ref: '#/components/schemas/ChatCompletionRequestSchema'
+    required_inputs: [model, messages]
+    optional_inputs: [temperature, stream, max_tokens]
+    consequence: write
+    side_effects: >-
+      Consumes credits/tokens on the caller's account. NOT safely retryable — there is no
+      idempotency key (see conventions/).
+    confidence: high
+  - name: list_models
+    description: List the model identifiers available to the calling API key.
+    rest:
+      operationId: get-external-api-v1-models
+      method: GET
+      path: /v1/models
+      spec: openapi/secton-api-models-api-openapi.yml
+    input_schema_ref: null
+    required_inputs: []
+    consequence: read
+    side_effects: none
+    confidence: high
+coverage:
+  openapi_operations: 2
+  candidate_tools: 2
+  mapped: 2
+  unmapped_operations: 0
+crosswalk_emitted: false
+crosswalk_note: >-
+  mcp/secton-api-tool-crosswalk.yml is intentionally NOT written. A crosswalk records divergence
+  between a real MCP/GraphQL surface and a REST contract; with no MCP server and no GraphQL
+  endpoint (POST https://api.secton.org/graphql hits the soft-404 catch-all), there is nothing to
+  cross-walk — the candidate tool list above already is the 1:1 mapping.

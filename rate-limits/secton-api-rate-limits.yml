@@ -1,0 +1,72 @@
+generated: '2026-08-16'
+method: searched
+source: >-
+  https://secton.org/legal/console-terms (§13 Usage Limits, effective 2026-08-06),
+  npm `secton` 1.0.2 README (first-party SDK),
+  live unauthenticated probes of https://api.secton.org/v1/models and /v1/chat/completions
+limit_count: 0
+limits: []
+finding: >-
+  Secton documents that usage limits EXIST and enumerates their categories, but publishes no
+  numeric value for any of them, and returns no rate-limit headers on any response that can be
+  observed without an account. An agent cannot budget against this API from public information.
+documented_categories:
+  source: https://secton.org/legal/console-terms §13
+  quote: >-
+    "The Services may be subject to technical, operational, or commercial limits. These limits may
+    include: request limits; rate limits; token limits; throughput limits; storage limits;
+    concurrency limits; workspace limits; organization limits; model-specific restrictions. Usage
+    limits may change from time to time. Current limits may be published through the Console,
+    documentation, pricing materials, or other Service interfaces."
+  categories:
+    - request limits
+    - rate limits
+    - token limits
+    - throughput limits
+    - storage limits
+    - concurrency limits
+    - workspace limits
+    - organization limits
+    - model-specific restrictions
+  values_published: false
+  where_values_live: >-
+    "the Console" — i.e. behind authentication at https://console.secton.org. Nothing is published
+    to an unauthenticated reader.
+response_headers:
+  documented: []
+  observed: []
+  observed_on:
+    - request: 'GET https://api.secton.org/v1/models'
+      status: 401
+      rate_limit_headers: none
+    - request: 'POST https://api.secton.org/v1/chat/completions'
+      status: 401
+      rate_limit_headers: none
+  caveat: >-
+    Only unauthenticated 401 responses could be inspected. Headers on an authenticated 2xx or on a
+    real throttle were not observable in this pass, so "none observed" is a statement about the
+    anonymous edge, not proof the API never emits them.
+exhaustion:
+  status_code: presumed 429 — unverified
+  retry_after: >-
+    Indirect first-party evidence: the npm SDK exports `RateLimitError` with a `retryAfter`
+    property ("Rate limited. Retry after ${error.retryAfter}s" in the README error-handling
+    example). The SDK could not populate that field unless the API supplies a retry hint, so a
+    `Retry-After` header (or an equivalent body field) almost certainly exists on throttle. Its
+    exact name and location are not published.
+  client_backoff: >-
+    The SDK implements "exponential backoff with jitter" by default (`retries: 3`), which means
+    naive consumers will silently re-issue billable chat completions with no idempotency key. See
+    conventions/secton-api-conventions.yml.
+in_spec:
+  declared_429_responses: 0
+  note: Neither published operation declares a 429 response. See errors/secton-api-problem-types.yml.
+historical_note: >-
+  Rate limiting has been a concrete failure mode for Secton before: the 2025-10-07 post-incident
+  write-up (https://secton.org/blog/addressing-what-happened-back-in-june) discloses that the
+  Copilot guest 10-message daily limit "was not properly enforced server-side" and could be
+  bypassed from browser DevTools, and that a hardcoded public "playground" token had "no usage
+  limits". Both were remediated within 24 hours in June 2025.
+recommendation: >-
+  Publish the per-key request/token limits outside the console and return `RateLimit-Limit`,
+  `RateLimit-Remaining`, `RateLimit-Reset` (RFC 9331 style) plus `Retry-After` on 429.
