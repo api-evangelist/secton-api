@@ -9,7 +9,7 @@ description: >-
   status page remain live and the Console Terms of Service governing API keys were re-issued effective
   2026-08-06 — see lifecycle/secton-api-lifecycle.yml before building on it.
 image: https://cdn.secton.org/website-assets/summary_large_image.jpg
-url: https://secton-api.apievangelist.com/apis.yml
+url: https://raw.githubusercontent.com/api-evangelist/secton-api/refs/heads/main/apis.yml
 created: '2026-08-13'
 modified: '2026-08-16'
 specificationVersion: '0.21'
