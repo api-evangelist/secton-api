@@ -12,7 +12,7 @@ image: https://cdn.secton.org/website-assets/summary_large_image.jpg
 url: https://raw.githubusercontent.com/api-evangelist/secton-api/refs/heads/main/apis.yml
 created: '2026-08-13'
 modified: '2026-08-16'
-specificationVersion: '0.21'
+specificationVersion: '0.23'
 tags:
   - ai
   - inference
