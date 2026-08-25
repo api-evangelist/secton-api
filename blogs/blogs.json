@@ -1,0 +1,14 @@
+{
+  "repo": "secton-api",
+  "feeds": [
+    {
+      "source": "https://console.secton.org/api",
+      "feed_url": "https://console.secton.org/api",
+      "title": "",
+      "saved": 0,
+      "method": "none"
+    }
+  ],
+  "post_count": 0,
+  "fetched": "2026-08-22T20:20:02Z"
+}
