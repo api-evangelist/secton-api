@@ -8,6 +8,18 @@ description: >-
   shutdown of the API on 2025-11-18 with an end date of 2025-12-19, yet the host, the OpenAPI and the
   status page remain live and the Console Terms of Service governing API keys were re-issued effective
   2026-08-06 — see lifecycle/secton-api-lifecycle.yml before building on it.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: true
+  label: Hosted service · you call their endpoint
+  confidence: high
+  source:
+  - openapi
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://cdn.secton.org/website-assets/summary_large_image.jpg
 url: https://raw.githubusercontent.com/api-evangelist/secton-api/refs/heads/main/apis.yml
 created: '2026-08-13'
