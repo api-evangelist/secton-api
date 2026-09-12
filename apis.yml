@@ -103,6 +103,8 @@ generated:
   confidence: 95
   at: '2026-08-13T10:46:31.364Z'
 common:
+- type: Website
+  url: https://www.secton.org/
 - type: DomainSecurity
   url: security/secton-api-domain-security.yml
 - type: Authentication
