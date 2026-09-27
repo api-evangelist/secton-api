@@ -48,7 +48,7 @@ tags:
   - Developer Tools
   - OpenAI-Compatible
   - Streaming
-  - Machine-Learning
+  - Machine Learning
 tags_raw:
   - ai
   - inference
@@ -60,6 +60,7 @@ tags_raw:
   - streaming
   - machine-learning
   - api
+  - Machine-Learning
 apis:
 - aid: secton-api:secton-api-chat-api
   name: Secton API Chat API
@@ -178,3 +179,4 @@ x-enrichment:
     AsyncAPI: no event, webhook or message surface — genuinely N/A, streaming is in-band
     OAuthScopes: authentication is a single all-or-nothing API key; there is no scope surface
     ToolCrosswalk: nothing to cross-walk without an MCP or GraphQL surface
+x-status: defunct
