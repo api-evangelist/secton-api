@@ -33,6 +33,29 @@ paths:
           $ref: '#/components/responses/200 ChatCompletionChunkSchema'
 components:
   schemas:
+    ChatCompletionRequestSchema:
+      type: object
+      properties:
+        model:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageSchema'
+          minItems: 1
+        temperature:
+          type: number
+          default: 0.7
+        stream:
+          type: boolean
+          default: false
+        max_tokens:
+          type: integer
+          maximum: 4096
+          exclusiveMinimum: 0
+      required:
+      - model
+      - messages
     ChatCompletionResponseSchema:
       type: object
       properties:
@@ -105,29 +128,6 @@ components:
       required:
       - role
       - content
-    ChatCompletionRequestSchema:
-      type: object
-      properties:
-        model:
-          type: string
-        messages:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatMessageSchema'
-          minItems: 1
-        temperature:
-          type: number
-          default: 0.7
-        stream:
-          type: boolean
-          default: false
-        max_tokens:
-          type: integer
-          maximum: 4096
-          exclusiveMinimum: 0
-      required:
-      - model
-      - messages
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
