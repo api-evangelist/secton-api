@@ -62,22 +62,6 @@ tags_raw:
   - api
   - Machine-Learning
 apis:
-- aid: secton-api:secton-api-chat-api
-  name: Secton API Chat API
-  description: The Chat API from Secton API — 1 operation(s) for chat.
-  humanURL: https://console.secton.org/api
-  baseURL: https://api.secton.org
-  tags:
-  - Chat
-  properties:
-  - type: OpenAPI
-    url: openapi/secton-api-chat-api-openapi.yml
-  - type: Documentation
-    url: https://console.secton.org/api
-  - type: Overlay
-    url: overlays/secton-api-chat-api-overlay.yaml
-  - type: AgentSkill
-    url: skills/secton-api-chat-completion.md
 - aid: secton-api:secton-api-models-api
   name: Secton API Models API
   description: The Models API from Secton API — 1 operation(s) for models.
@@ -94,6 +78,18 @@ apis:
     url: overlays/secton-api-models-api-overlay.yaml
   - type: AgentSkill
     url: skills/secton-api-list-models.md
+- aid: secton-api:secton-api-chat-completions-api
+  name: Secton API Chat Completions API
+  description: The Chat Completions API from Secton API — 1 operation(s) for chat completions.
+  humanURL: https://console.secton.org/api
+  baseURL: https://api.secton.org
+  tags:
+  - Chat Completions
+  properties:
+  - type: OpenAPI
+    url: openapi/secton-api-chat-completions-api-openapi.yml
+  - type: Documentation
+    url: https://console.secton.org/api
 maintainers:
   - FN: Secton
     email: management@secton.org
@@ -104,6 +100,10 @@ generated:
   confidence: 95
   at: '2026-08-13T10:46:31.364Z'
 common:
+- type: Overlay
+  url: overlays/secton-api-chat-api-overlay.yaml
+- type: AgentSkill
+  url: skills/secton-api-chat-completion.md
 - type: CapabilityMap
   url: capabilities/secton-api-capability-edges.yml
   name: Secton API Business Capability Map

@@ -7,7 +7,7 @@ servers:
 - url: https://api.secton.org
   description: Production
 tags:
-- name: Chat
+- name: Chat Completions
 paths:
   /v1/chat/completions:
     post:
@@ -15,7 +15,7 @@ paths:
       summary: Create a chat completion
       description: ''
       tags:
-      - Chat
+      - Chat Completions
       parameters: []
       requestBody:
         content:
@@ -33,29 +33,6 @@ paths:
           $ref: '#/components/responses/200 ChatCompletionChunkSchema'
 components:
   schemas:
-    ChatCompletionRequestSchema:
-      type: object
-      properties:
-        model:
-          type: string
-        messages:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChatMessageSchema'
-          minItems: 1
-        temperature:
-          type: number
-          default: 0.7
-        stream:
-          type: boolean
-          default: false
-        max_tokens:
-          type: integer
-          maximum: 4096
-          exclusiveMinimum: 0
-      required:
-      - model
-      - messages
     ChatCompletionResponseSchema:
       type: object
       properties:
@@ -114,6 +91,29 @@ components:
       - model
       - choices
       - usage
+    ChatCompletionRequestSchema:
+      type: object
+      properties:
+        model:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatMessageSchema'
+          minItems: 1
+        temperature:
+          type: number
+          default: 0.7
+        stream:
+          type: boolean
+          default: false
+        max_tokens:
+          type: integer
+          maximum: 4096
+          exclusiveMinimum: 0
+      required:
+      - model
+      - messages
     ChatMessageSchema:
       type: object
       properties:
