@@ -104,6 +104,9 @@ generated:
   confidence: 95
   at: '2026-08-13T10:46:31.364Z'
 common:
+- type: CapabilityMap
+  url: capabilities/secton-api-capability-edges.yml
+  name: Secton API Business Capability Map
 - type: Website
   url: https://www.secton.org/
 - type: DomainSecurity
@@ -179,4 +182,3 @@ x-enrichment:
     AsyncAPI: no event, webhook or message surface — genuinely N/A, streaming is in-band
     OAuthScopes: authentication is a single all-or-nothing API key; there is no scope surface
     ToolCrosswalk: nothing to cross-walk without an MCP or GraphQL surface
-x-status: defunct
