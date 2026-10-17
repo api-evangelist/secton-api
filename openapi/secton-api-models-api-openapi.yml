@@ -26,6 +26,18 @@ paths:
                 $ref: '#/components/schemas/ModelsResponseSchema'
 components:
   schemas:
+    ModelSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+          - model
+      required:
+      - id
+      - object
     ModelsResponseSchema:
       type: object
       properties:
@@ -40,18 +52,6 @@ components:
       required:
       - object
       - data
-    ModelSchema:
-      type: object
-      properties:
-        id:
-          type: string
-        object:
-          type: string
-          enum:
-          - model
-      required:
-      - id
-      - object
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
